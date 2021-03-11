@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style>
+        /* @import url("https://webglfundamentals.org/webgl/resources/webgl-tutorials.css"); */
+        body{
+            margin: 0;
+        }
+        canvas{
+            width: 700px;
+            height: 500px;
+            display: block;
+            border: 1px solid gray;
+        }
+    </style>
+    <title>WebGL 0.0.2</title>
+</head>
+<body>
+    <canvas id="c"></canvas>
+
+    <script type="notjs" id="vertex-shader-2d">
+        attribute vec2 a_position;
+
+        //all together with resolution && translation && rotation && scaling as projection function
+        uniform mat3 u_matrix;
+        
+        void main() {
+            //multiply the position by the matrix
+            gl_Position = vec4((u_matrix * vec3(a_position, 1)).xy, 0, 1);
+        }
+        
+    </script>
+    
+    <!-- <script type="notjs" id="vertex-shader-2d">
+        //original position
+        attribute vec2 a_position;
+
+        //devide with screen size
+        uniform vec2 u_resolution;
+        // translation & rotaion & scaling
+        uniform mat3 u_matrix;
+        
+        void main() {
+            //multiply the position by the matrix
+            vec2 position = (u_matrix * vec3(a_position, 1)).xy;
+
+            //pixel to clipspace
+            vec2 zeroToOne = position / u_resolution;
+            vec2 zeroToTwo = zeroToOne * 2.0;
+            vec2 clipSpace = zeroToTwo - 1.0;
+    
+            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+        }
+        
+    </script> -->
+
+    <!-- <script type="notjs" id="vertex-shader-2d">
+        attribute vec2 a_position;
+
+        uniform vec2 u_resolution;
+        uniform vec2 u_translation;
+        uniform vec2 u_rotation;
+        uniform vec2 u_scale;
+        
+        void main() {
+            //scale the position
+            vec2 scaledPosition = a_position * u_scale;
+
+            //rotate the position
+            vec2 rotatedPosition = vec2(
+                scaledPosition.x * u_rotation.y + scaledPosition.y * u_rotation.x,
+                scaledPosition.y * u_rotation.y - scaledPosition.x * u_rotation.x
+            );
+
+            //translate the position
+            vec2 position = rotatedPosition + u_translation;
+
+            //pixel to clipspace
+            vec2 zeroToOne = position / u_resolution;
+            vec2 zeroToTwo = zeroToOne * 2.0;
+            vec2 clipSpace = zeroToTwo - 1.0;
+    
+            gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+        }
+        
+    </script> -->
+    
+    <script type="notjs" id="fragment-shader-2d">
+        precision mediump float;
+
+        uniform vec4 u_color;
+        
+        void main() {
+            gl_FragColor = u_color;
+        }
+        
+    </script>
+    
+    <script src="https://webglfundamentals.org/webgl/resources/webgl-utils.js"></script>
+    <script src="math.js"></script>
+    <script src="initialization.js"></script>
+</body>
+</html>
