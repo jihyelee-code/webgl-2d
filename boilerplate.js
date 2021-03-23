@@ -34,10 +34,10 @@ ObjectPainter.prototype = {
         this.program = this.createProgram();
 
         //Step3. look up the location of the attribute && uniforms && varying
-        this.location = this.createLocations(this.locationNames),
-            //Step4. create buffer
-            this.positionBuffer = this.createBuffer(this.objectStatus.geometry),
-            this.colorBuffer = this.createBuffer(this.objectStatus.color)
+        this.location = this.createLocations(this.locationNames);
+        //Step4. create buffer
+        this.positionBuffer = this.createBuffer(this.objectStatus.geometry);
+        this.colorBuffer = this.createBuffer(this.objectStatus.color);
     },
 
     /**
@@ -189,26 +189,27 @@ ObjectPainter.prototype = {
             this.gl.vertexAttribPointer(this.location.positionLocation, size, type, normalize, stride, offset);
         }
 
-        this.gl.enableVertexAttribArray(this.location.colorLocation);
+        // this.gl.enableVertexAttribArray(this.location.colorLocation);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        {
-            const size = 4;
-            const type = this.gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            //'vertexAttribPointer' binds the 'current ARRAY_BUFFER' to the attribute.
-            //so this attribute is bound to 'positionBuffer'
-            this.gl.vertexAttribPointer(this.location.colorLocation, size, type, normalize, stride, offset);
-        }
+        // this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        // {
+        //     const size = 4;
+        //     const type = this.gl.FLOAT;
+        //     const normalize = false;
+        //     const stride = 0;
+        //     const offset = 0;
+        //     //'vertexAttribPointer' binds the 'current ARRAY_BUFFER' to the attribute.
+        //     //so this attribute is bound to 'positionBuffer'
+        //     this.gl.vertexAttribPointer(this.location.colorLocation, size, type, normalize, stride, offset);
+        // }
 
         //compute the matrices
         //projection: zeroToOne && zeroToTwo && clipSpace && upside down
         let matrix = m3.projection(this.gl.canvas.clientWidth, this.gl.canvas.clientHeight);
-        matrix = m3.translate(matrix, this.objectStatus.translation.x, this.objectStatus.translation.y);
+        matrix = m3.translate(matrix, this.objectStatus.centeringPosition.x, this.objectStatus.centeringPosition.y);
         matrix = m3.rotate(matrix, this.objectStatus.angleInRadians);
         matrix = m3.scale(matrix, this.objectStatus.scale[0], this.objectStatus.scale[1]);
+        matrix = m3.translate(matrix, this.objectStatus.centeringRotation.x, this.objectStatus.centeringRotation.y);
         //set rotate with center
 
         //set the matrix
@@ -218,7 +219,7 @@ ObjectPainter.prototype = {
         {
             const primitiveType = this.gl.TRIANGLES;
             const offset = 0;
-            const count = 6;        //how many times vertex shader should be executed
+            const count = 18;        //how many times vertex shader should be executed
             this.gl.drawArrays(primitiveType, offset, count);
         }
     }
