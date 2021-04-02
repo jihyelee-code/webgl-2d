@@ -23,30 +23,59 @@
     <canvas id="c"></canvas>
 
     <script type="x-shader/x-vertex" id="vertex-shader-2d">
-        attribute vec2 a_position;
+        attribute vec3 a_position;
         attribute vec4 a_color;
+        attribute vec3 a_barycentric;
 
         //all together with resolution && translation && rotation && scaling as projection function
         uniform mat3 u_matrix;
         
         varying vec4 v_color;
+        varying vec3 vBC;
 
         void main() {
             //multiply the position by the matrix
-            gl_Position = vec4((u_matrix * vec3(a_position, 1)).xy, 0, 1);
-            v_color = gl_Position * 0.5 + 0.5;
+            gl_Position = vec4((u_matrix * vec3(a_position)).xy, 0, 1);
+            //v_color = gl_Position * 0.5 + 0.5;
+            v_color = a_color;
+            vBC = a_barycentric;
         }
         
     </script>
         
     <script type="x-shader/x-fragment" id="fragment-shader-2d">
-        precision mediump float;
-
-        varying vec4 v_color;
+        #extension GL_OES_standard_derivatives : enable
         
-        void main() {
-            gl_FragColor = v_color;
+        precision mediump float;
+        
+        varying vec4 v_color;
+        varying vec3 vBC;
+
+        float edgeFactor(){
+            vec3 d = fwidth(vBC);
+            vec3 a3 = smoothstep(vec3(0.0), d*1.0, vBC);
+            return min(min(a3.x, a3.y), a3.z);
         }
+ 
+     //   void main(){
+            // coloring by edge
+        //    gl_FragColor.rgb = mix(vec3(0.0), vec3(0.5), edgeFactor());
+         //   gl_FragColor.a = 1.0;
+    
+            // alpha by edge
+       //     if(gl_FrontFacing){
+         //       gl_FragColor = vec4(0.0, 0.0, 0.0, (1.0-edgeFactor())*0.95);
+      //      }
+        //    else{
+        //        gl_FragColor = vec4(0.0, 0.0, 0.0, (1.0-edgeFactor())*0.7);
+       //     }
+
+    //    }
+
+      void main() {
+          gl_FragColor = v_color;
+
+      }
         
     </script>
 
