@@ -15,7 +15,6 @@ export function ObjectPainter(canvas, objectStatus) {
     this.location = null;
     this.positionBuffer = null;
     this.colorBuffer = null;
-    this.indexBuffer = null;
     this.barycentricBuffer = null;
     this.objectStatus = objectStatus;
     this.gl = canvas.getContext("webgl");
@@ -40,37 +39,10 @@ ObjectPainter.prototype = {
         //Step3. look up the location of the attribute && uniforms && varying
         this.location = this.createLocations(this.locationNames);
         //Step4. create buffer
-        
-        this.index = [
-            0,  1,  2,      0,  2,  3,    // front
-            4,  5,  6,      4,  6,  7,    // back
-            8,  9,  10,     8,  10, 11,   // top
-            12, 13, 14,     12, 14, 15,   // bottom
-            16, 17, 18,     16, 18, 19,   // right
-            20, 21, 22,     20, 22, 23    // left
-        ]
-        // this.indexBuffer = this.createBuffer(this.index, true);
-        
-        
-        this.reorderedPosition = [];
-        for(let i=0; i<this.index.length; i++){
-            this.reorderedPosition.push(this.objectStatus.geometry[this.index[i]*3 + 0]);
-            this.reorderedPosition.push(this.objectStatus.geometry[this.index[i]*3 + 1]);
-            this.reorderedPosition.push(this.objectStatus.geometry[this.index[i]*3 + 2]);
-        }
-        console.log(this.reorderedPosition.length/3)
-        this.count = this.reorderedPosition.length/3;
-        this.positionBuffer = this.createBuffer(this.reorderedPosition);
-
-        for(let i=0; i<this.count ; i++){
-            this.objectStatus.color.push(1.0, 0.7, 0.7, 1.0)
-        }
-        
-
+        this.positionBuffer = this.createBuffer(this.objectStatus.geometry);
         this.colorBuffer = this.createBuffer(this.objectStatus.color);
 
-        // console.log(this.reorderedPosition)
-        const count = this.reorderedPosition.length / 9;
+        const count = this.objectStatus.geometry.length / 6;
         const barycentric = [];
         for (let i = 0; i < count; i++) {
             barycentric.push(
@@ -80,8 +52,6 @@ ObjectPainter.prototype = {
             );
         }
         this.barycentricBuffer = this.createBuffer(barycentric);
-
-
     },
 
     /**
@@ -189,24 +159,14 @@ ObjectPainter.prototype = {
     */
     createBuffer: function (bufferData) {
         const buffer = this.gl.createBuffer();
-        // if(isIndex){
-        //     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffer);
-        //     this.gl.bufferData(
-        //         this.gl.ELEMENT_ARRAY_BUFFER,
-        //         new Uint16Array([
-        //             ...bufferData
-        //         ]),
-        //         this.gl.STATIC_DRAW);
-        // }else{
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-            this.gl.bufferData(
-                this.gl.ARRAY_BUFFER,
-                new Float32Array([
-                    ...bufferData
-                ]),
-                this.gl.STATIC_DRAW);
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+        this.gl.bufferData(
+            this.gl.ARRAY_BUFFER,
+            new Float32Array([
+                ...bufferData
+            ]),
+            this.gl.STATIC_DRAW);
 
-        // }
         return buffer;
     },
 
@@ -235,7 +195,7 @@ ObjectPainter.prototype = {
 
         // 7-3.tell how to get data out of positionBuffer
         {
-            const size = 3;             // num of components per iteration
+            const size = 3;             // 2 components per iteration
             const type = this.gl.FLOAT;      // the data is 32 bit floats
             const normalize = false;    // don't normalize the data
             const stride = 0;           // 0 = move forward size * sizeof(type) each iteration to get the next position
@@ -264,19 +224,20 @@ ObjectPainter.prototype = {
         }
 
 
-        this.gl.enableVertexAttribArray(this.location.colorLocation);
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
-        {
-            const size = 4;
-            const type = this.gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            //'vertexAttribPointer' binds the 'current ARRAY_BUFFER' to the attribute.
-            //so this attribute is bound to 'positionBuffer'
-            this.gl.vertexAttribPointer(this.location.colorLocation, size, type, normalize, stride, offset);
-        }
+        // this.gl.enableVertexAttribArray(this.location.colorLocation);
+
+        // this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colorBuffer);
+        // {
+        //     const size = 4;
+        //     const type = this.gl.FLOAT;
+        //     const normalize = false;
+        //     const stride = 0;
+        //     const offset = 0;
+        //     //'vertexAttribPointer' binds the 'current ARRAY_BUFFER' to the attribute.
+        //     //so this attribute is bound to 'positionBuffer'
+        //     this.gl.vertexAttribPointer(this.location.colorLocation, size, type, normalize, stride, offset);
+        // }
 
         //compute the matrices
         //projection: zeroToOne && zeroToTwo && clipSpace && upside down
@@ -294,17 +255,8 @@ ObjectPainter.prototype = {
         {
             const primitiveType = this.gl.TRIANGLES;
             const offset = 0;
-            const count = this.count;        //how many times vertex shader should be executed
-
-            // if(this.index){
-            //     const indexType = this.gl.UNSIGNED_SHORT;
-            //     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
-            //     this.gl.drawElements(primitiveType, count, indexType, offset);
-
-            // }else{
-                this.gl.drawArrays(primitiveType, offset, count);
-            // }
-                
+            const count = 18;        //how many times vertex shader should be executed
+            this.gl.drawArrays(primitiveType, offset, count);
         }
     }
 };

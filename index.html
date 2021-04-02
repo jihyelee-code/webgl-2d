@@ -21,6 +21,9 @@
 </head>
 <body>
     <canvas id="c"></canvas>
+    <input type="range" name="translateZ" id="translateZ" min="-500" max="500">
+    <label for="translateZ"></label>
+    
 
     <script type="x-shader/x-vertex" id="vertex-shader-2d">
         attribute vec3 a_position;
@@ -57,25 +60,24 @@
             return min(min(a3.x, a3.y), a3.z);
         }
  
-     //   void main(){
+        void main(){
             // coloring by edge
-        //    gl_FragColor.rgb = mix(vec3(0.0), vec3(0.5), edgeFactor());
-         //   gl_FragColor.a = 1.0;
+            gl_FragColor.rgb = mix(vec3(0.0), vec3(1.0, 0.7, 0.7), edgeFactor());
+            gl_FragColor.a = 1.0;
     
             // alpha by edge
-       //     if(gl_FrontFacing){
-         //       gl_FragColor = vec4(0.0, 0.0, 0.0, (1.0-edgeFactor())*0.95);
-      //      }
-        //    else{
-        //        gl_FragColor = vec4(0.0, 0.0, 0.0, (1.0-edgeFactor())*0.7);
-       //     }
+            if(gl_FrontFacing){
+             //   gl_FragColor = vec4(0.0, 0.0, 0.0, (1.0-edgeFactor())*0.95);
+            }
+            else{
+            //   gl_FragColor = vec4(0.0, 0.0, 0.0, (1.0-edgeFactor())*0.7);
+            }
 
-    //    }
+        }
 
-      void main() {
-          gl_FragColor = v_color;
-
-      }
+   //   void main() {
+   //       gl_FragColor = v_color;
+    //  }
         
     </script>
 
